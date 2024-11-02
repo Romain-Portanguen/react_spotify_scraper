@@ -12,7 +12,7 @@ export const TracksTable: React.FC<TracksTableProps> = ({ tracks }) => {
       <table id="recently-played-tracks">
         <thead>
           <tr>
-            <th>Title</th>
+            <th>Track</th>
             <th>Artist(s)</th>
             <th>Played at</th>
           </tr>

@@ -10,6 +10,7 @@ import { ExportButton } from './ExportButton';
 import { Loader } from './Loader';
 import { Footer } from './Footer';
 import { RefetchButton } from './RefetchButton';
+import { SetStartHourInput } from './SetStartHourInput';
 
 interface Playlist {
   id: string;
@@ -26,6 +27,7 @@ export const SpotifyScraper: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlaylist, setSelectedPlaylist] = useState<string | null>(null);
+  const [startHour, setStartHour] = useState<number | null>(null);
 
   const spotifyApiService = useContext<ISpotifyApiService>(SpotifyApiContext);
   const processedTracksService = useContext<IProcessedTracksService>(ProcessedTracksContext);
@@ -34,8 +36,13 @@ export const SpotifyScraper: React.FC = () => {
     setIsLoading(true);
     setError(null);
     setSelectedPlaylist(playlistId);
+
     try {
       const fetchedTracks = await spotifyApiService.fetchTracks(playlistId);
+
+      const startTime = startHour !== null
+        ? new Date(new Date().setHours(startHour, 0, 0, 0))
+        : undefined;
 
       const processedTracks = processedTracksService.calculatePlayedTimes(
         fetchedTracks.map((track) => ({
@@ -43,7 +50,9 @@ export const SpotifyScraper: React.FC = () => {
           title: track.title,
           artist: track.artist,
           duration_ms: track.duration_ms,
-        }))
+        })),
+        startHour === null, // `useRandomStartTime` est `true` seulement si `startHour` n'est pas défini
+        startTime
       );
 
       if (processedTracks.length === 0) {
@@ -57,7 +66,7 @@ export const SpotifyScraper: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [spotifyApiService, processedTracksService]);
+  }, [spotifyApiService, startHour, processedTracksService]);
 
   const handleRefetch = useCallback(() => {
     if (selectedPlaylist) {
@@ -96,7 +105,7 @@ export const SpotifyScraper: React.FC = () => {
       <div className="flex flex-1">
         <aside className="flex flex-col w-1/4 bg-gray-800 to-gray-900 text-white p-5 shadow-lg border-r-2 border-green-600">
           <h2 className="text-3xl font-bold mb-6 text-spotifyGreen">Playlists</h2>
-          <div className="flex flex-col items-center justify-center gap-2">
+          <div className="flex flex-col items-center justify-center gap-2 mb-3">
             {playlists.map((playlist) => (
               <PlaylistButton
                 key={playlist.id}
@@ -105,6 +114,7 @@ export const SpotifyScraper: React.FC = () => {
               />
             ))}
           </div>
+          <SetStartHourInput value={startHour} onChange={(e) => setStartHour(Number(e.target.value))} />
           {selectedPlaylist ? (
             <>
               <ExportButton targetId="recently-played-tracks" />

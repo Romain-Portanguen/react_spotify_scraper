@@ -19,15 +19,15 @@ export class ProcessedTracksService implements IProcessedTracksService {
       ? generateRandomStartTime(initialStartTime)
       : initialStartTime;
 
-    reversedTracks[0].new_played_at = newStartTime;
+    reversedTracks[reversedTracks.length - 1].new_played_at = newStartTime;
 
-    for (let i = 1; i < reversedTracks.length; i++) {
-      const previousTrack = reversedTracks[i - 1];
-      const duration = previousTrack.duration_ms;
-      const previousPlayedAt = previousTrack.new_played_at;
+    for (let i = reversedTracks.length - 2; i >= 0; i--) {
+      const nextTrack = reversedTracks[i + 1];
+      const duration = reversedTracks[i].duration_ms;
+      const nextPlayedAt = nextTrack.new_played_at;
 
-      if (previousPlayedAt) {
-        reversedTracks[i].new_played_at = new Date(previousPlayedAt.getTime() - duration);
+      if (nextPlayedAt) {
+        reversedTracks[i].new_played_at = new Date(nextPlayedAt.getTime() + duration);
       }
     }
 
