@@ -51,7 +51,7 @@ export const SpotifyScraper: React.FC = () => {
           artist: track.artist,
           duration_ms: track.duration_ms,
         })),
-        startHour === null, // `useRandomStartTime` est `true` seulement si `startHour` n'est pas défini
+        startHour === null,
         startTime
       );
 
